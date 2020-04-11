@@ -1,3 +1,5 @@
+import java.util.UUID
+
 import com.h2.entities._
 
 object BankOfScala {
@@ -15,6 +17,10 @@ object BankOfScala {
     println(s"Deposits Products Ids: $depositProductIds")
     println(s"LendingProductIds: $lendingProductIds")
 
+    def openAccounts(customerId: UUID, productId: UUID, productType: String) = productType match {
+      case "Deposits" => bank.openDepositAccount(customerId, productId, _: Dollars)
+        case "Lending" => bank.openLendingAccount(customerId, productId, _: Dollars)
+    }
     /*
     Bank clerk opening the account.
     There is no money deposited in the account yet, so the accounts are not active
@@ -22,11 +28,10 @@ object BankOfScala {
     val depositAccounts = for {
       c <- customerIds
       p <- depositProductIds
-    } yield bank.openDepositAccount(c, p, _: Dollars)
-
+    } yield openAccounts(c, p, "Deposits")
     /* Depositing money into the accounts */
     val random = new scala.util.Random()
-    val depositAccountIds = depositAccounts.map(account => account(Dollars(10000 + random.nextInt(10000))))
+    val depositAccountIds = depositAccounts map { account => account(Dollars(10000 + random.nextInt(10000))) }
 
 
     /* logging */
@@ -40,8 +45,8 @@ object BankOfScala {
     val lendingAccounts = for {
       c <- customerIds
       p <- lendingProductIds
-    } yield bank.openLendingAccount(c, p, _: Dollars)
-    val lendingAccountIds = lendingAccounts.map(account => account(Dollars(random.nextInt(500))))
+    } yield openAccounts(c, p, "Lending")
+    val lendingAccountIds = lendingAccounts map { account => account(Dollars(random.nextInt(500))) }
 
     /* logging */
     println(s"Lending Accounts: $lendingAccounts")
@@ -52,14 +57,18 @@ object BankOfScala {
       Performing Deposit Accounts transactions
      */
     val randomAmount = new scala.util.Random(100)
-    depositAccountIds.foreach(bank deposit(_, Dollars(1 + randomAmount.nextInt(100))))
-    depositAccountIds.foreach(bank withdraw(_, Dollars(1 + randomAmount.nextInt(50))))
+    depositAccountIds foreach { accountId =>
+      bank deposit(accountId, Dollars(1 + randomAmount.nextInt(100)))
+      bank withdraw(accountId, Dollars(1 + randomAmount.nextInt(50)))
+    }
 
     /*
       Performing Lending Accounts transactions
     */
-    lendingAccountIds.foreach(bank useCreditCard (_, Dollars(1 + randomAmount.nextInt(500))))
-    lendingAccountIds.foreach(bank payCreditCardBill (_, Dollars(1 + randomAmount.nextInt(100))))
+    lendingAccountIds foreach { accountId =>
+      bank useCreditCard(accountId, Dollars(1 + randomAmount.nextInt(500)))
+      bank payCreditCardBill(accountId, Dollars(1 + randomAmount.nextInt(100)))
+    }
   }
 
   /* ------------------- Data ------------------- */

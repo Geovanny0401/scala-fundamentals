@@ -42,6 +42,12 @@ trait AccountService extends AccountsDb
     maybeAccount.get withdraw dollars
   }
 
+  def requestCurrency(accountId: UUID, currency: Currency): Unit = {
+    withdraw(accountId, currency.costInDollars)
+    // some work to register request to send money to customer's nearest branch
+    println(s"The ${currency.amount} ${currency.code} will be posted to your nearest branch in 2 days.")
+  }
+
   def useCreditCard(accountId: UUID, dollars: Dollars): Unit = {
     val maybeAccount = getLendingAccount(accountId)
     require(maybeAccount.nonEmpty, "A valid lending account Id must be provided")

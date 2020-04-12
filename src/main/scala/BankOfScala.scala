@@ -19,7 +19,7 @@ object BankOfScala {
 
     def openAccounts(customerId: UUID, productId: UUID, productType: String) = productType match {
       case "Deposits" => bank.openDepositAccount(customerId, productId, _: Dollars)
-        case "Lending" => bank.openLendingAccount(customerId, productId, _: Dollars)
+      case "Lending" => bank.openLendingAccount(customerId, productId, _: Dollars)
     }
     /*
     Bank clerk opening the account.
